@@ -7,8 +7,8 @@ public class InputOutput {
     private PrintWriter cout=new PrintWriter(System.out);
 
     //ввод данных с читателя cin
-    public Graph getData(Graph g, BufferedReader cin) throws IOException {//передаем ссылку на граф, в который надо считать данные,
-        StringTokenizer tokenizer = new StringTokenizer(cin.readLine());
+    public Graph getData(Graph g, BufferedReader cin, BufferedReader cinV) throws IOException {//передаем ссылку на граф, в который надо считать данные,
+        StringTokenizer tokenizer = new StringTokenizer(cinV.readLine());
         g = new Graph(Integer.parseInt(tokenizer.nextToken())); //считываем количество вершин графа
         //g.numE = Integer.parseInt(tokenizer.nextToken()); //считываем количество ребер графа
         String s;

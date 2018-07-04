@@ -164,7 +164,8 @@ public class Launcher extends JFrame{
         buttonGraph.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
                 try {
-                    gr = ios.getData(gr, new BufferedReader(new StringReader(dataGraph.getText())));
+                    gr = ios.getData(gr, new BufferedReader(new StringReader(dataGraph.getText())),
+                            new BufferedReader(new StringReader(spinner.getValue().toString())));
                     canvas.setContent(gr);
                     descLabel.setText("Description: Graph is constructed");
                     resLabel.setText("Result: -");
