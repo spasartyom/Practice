@@ -190,6 +190,10 @@ public class VGraph extends JPanel {
             if(current != null){
                 Ellipse2D tmp = (Ellipse2D) current.get("component");
                 Coord crd = new Coord(e.getX()+10,e.getY());
+                if(crd.x<20) crd.x = 20;
+                if(crd.y<20) crd.y = 20;
+                if(crd.x>610) crd.x = 610;
+                if(crd.y>440) crd.y = 440;
                 tmp.setFrame(crd.x-20, crd.y-10,30,30);
                 current.replace("pos", crd);
 
