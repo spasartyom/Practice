@@ -117,7 +117,17 @@ public class Launcher extends JFrame{
         //строка для указания кол-ва вершин
         this.dataGraph = new JTextArea("");
         this.dataGraph.setBounds(12,64,140,1840);
-        //this.dataGraph.setText("8 10\n1 2\n2 3\n2 4\n3 4\n4 3\n4 5\n4 6\n6 7\n7 8\n8 6");
+        this.dataGraph.setText("0 1 7\n" +
+                "0 3 4\n" +
+                "1 3 9\n" +
+                "1 2 11\n" +
+                "1 4 10\n" +
+                "2 4 5\n" +
+                "3 4 15\n" +
+                "3 5 6\n" +
+                "4 5 12\n" +
+                "4 6 8\n" +
+                "5 6 13");
         JScrollPane scroll = new JScrollPane(dataGraph);
         scroll.setBounds(12,64,140,184);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -166,6 +176,7 @@ public class Launcher extends JFrame{
                 try {
                     gr = ios.getData(gr, new BufferedReader(new StringReader(dataGraph.getText())),
                             new BufferedReader(new StringReader(spinner.getValue().toString())));
+                    mst = new MST(gr);
                     canvas.setContent(gr);
                     descLabel.setText("Description: Graph is constructed");
                     resLabel.setText("Result: -");
@@ -181,17 +192,35 @@ public class Launcher extends JFrame{
 
         buttonCheck.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ev) {
-                if(buttonResult.isEnabled())
-                    canvas.checkBox(gr);
-                else
-                    canvas.checkBox(new MST(gr));
+                canvas.checkBox();
+            }
+        });
+        buttonNext.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ev) {
+                try {
+                    MST mstEnd = new MST(gr);
+                    mstEnd.build();
+                    if(mstEnd.equal(mst)){
+                        buttonResult.setEnabled(false);
+                        buttonNext.setEnabled(false);
+                        buttonGraph.setEnabled(true);
+                        resLabel.setText("Result: "+ mst.weight());
+                    }
+                    else{
+                        resLabel.setText("Result: step by step...");
+                    }
+                    canvas.setMST(mst.MSTtoGraph());
+                    mst.buildStep();
+                    descLabel.setText("Description: MST");
+                } catch (Exception e) {
+                    descLabel.setText("Description: exception! "+e.getClass().getName()+": "+e.getMessage());
+                }
             }
         });
 
         buttonResult.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
-                mst = new MST(gr);
-                canvas.setContent(mst);
+                canvas.setMST(gr);
                 descLabel.setText("Description: MST");
                 resLabel.setText("Result: "+ mst.weight());
                 buttonResult.setEnabled(false);

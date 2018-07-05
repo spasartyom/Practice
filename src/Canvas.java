@@ -26,38 +26,19 @@ public class Canvas extends  JPanel {
         this.revalidate();
         this.repaint();
     }
-    public void setContent(MST data) {
-        if (content != null) {
-            content.setVisible(false);
-        }
-        content = new VGraph(data);
+    public void setMST(Graph data){
+        content.SetMST(new MST(data));
         this.add(content);
         this.revalidate();
         this.repaint();
     }
-    public void checkBox(Graph data){
-
-        if (content != null) {
-            content.setVisible(false);
-        }
-        content = new VGraph(data);
+    public void checkBox(){
         wght = wght ? false : true;
         content.wght = wght;
         this.add(content);
         this.revalidate();
         this.repaint();
     }
-    public void checkBox(MST data){
 
-        if (content != null) {
-            content.setVisible(false);
-        }
-        content = new VGraph(data);
-        wght = wght ? false : true;
-        content.wght = wght;
-        this.add(content);
-        this.revalidate();
-        this.repaint();
-    }
 
 }

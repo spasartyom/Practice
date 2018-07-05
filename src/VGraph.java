@@ -13,6 +13,7 @@ import java.lang.Math;
 public class VGraph extends JPanel {
     public ArrayList<HashMap<String,Object>> vertices;
     public ArrayList<HashMap<String,Object>> edges;
+    public ArrayList<HashMap<String,Object>> mstEdges;
     public boolean wght = false;
     public HashMap<String, Object> current;
 
@@ -24,13 +25,17 @@ public class VGraph extends JPanel {
         g2d.setRenderingHint ( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         for (HashMap<String,Object> e: edges) {
+            if(attend(e)){
+                g2d.setStroke(new BasicStroke(2));
+                g2d.setColor(Color.RED);
+            }
             g2d.draw((Line2D) e.get("component"));
-            //g2d.setColor(Color.RED);
+            g2d.setStroke(new BasicStroke());
+            g2d.setColor(Color.BLACK);
             if(wght) {
                 Coord From = (Coord) e.get("posFrom");
                 Coord To = (Coord) e.get("posTo");
                 g2d.drawString(e.get("weight").toString(), (To.x - From.x) / 2 + From.x, (To.y - From.y) / 2 + From.y);
-                //g2d.draw((String));
             }
         }
 
@@ -47,14 +52,20 @@ public class VGraph extends JPanel {
             // Устанавливаем новый цвет;
             g2d.setColor(newColor);
             g2d.fill((Ellipse2D) vertices.get(i).get("component"));
-           // g2d.fillOval(vertC.x-20,vertC.y-10,30,30);
 
             // Восстанавливаем исходный цвет;
             g2d.setColor(oldColor);
-           // g2d.drawOval(vertC.x-20,vertC.y-10,30,30);
 
             g2d.drawString((String) vertices.get(i).get("name"), vertC.x-10, vertC.y+10);
         }
+    }
+    boolean attend(HashMap<String, Object> e){
+        if(mstEdges==null) return false;
+        for(HashMap<String, Object> er : mstEdges){
+            if(e.get("from").toString().equals(er.get("from").toString()) &&
+                    e.get("to").toString().equals(er.get("to").toString())) return true;
+        }
+        return false;
     }
 
     private void addVertex(String name) {
@@ -75,6 +86,13 @@ public class VGraph extends JPanel {
         edge.put("component", new Line2D.Double(0,0,0,0));
         edge.put("weight", weight);
         edges.add(edge);
+    }
+    private void addMstEdge(String fromName, String toName, double weight){
+        HashMap<String, Object> edge = new HashMap<>(6);
+        edge.put("from", fromName);
+        edge.put("to", toName);
+        edge.put("weight", weight);
+        mstEdges.add(edge);
     }
 
     private HashMap<String,Object> vertexLookup(String name) {
@@ -112,6 +130,14 @@ public class VGraph extends JPanel {
     public void recolor(int id, Color c) {
         vertices.get(id).replace("color",c);
     }
+    public void SetMST(MST original){
+        original.build();
+        LinkedList<Edge> tmp = new LinkedList<>(original.edges()) ;
+        mstEdges = new ArrayList<>(original.edges().size());
+        for(Edge e : tmp){
+            this.addMstEdge(String.valueOf(e.either()), String.valueOf(e.other(e.either())), e.weight());
+        }
+    }
 
     public VGraph(Graph original) {
         this.setBounds(0,0,634, 460);
@@ -122,8 +148,6 @@ public class VGraph extends JPanel {
 
         vertices = new ArrayList<>(original.V());
         edges = new ArrayList<>(original.edges().size());
-
-
         LinkedList<Edge> tmp = new LinkedList<>(original.edges()) ;
         for (int i = 0; i<original.V(); ++i) {
             this.addVertex( String.valueOf(i));
@@ -137,7 +161,7 @@ public class VGraph extends JPanel {
         this.revalidate();
         this.repaint();
     }
-    public VGraph(MST original) {
+    /*public VGraph(MST original) {
         this.setBounds(0,0,634, 460);
         this.setLayout(null);
 
@@ -159,7 +183,7 @@ public class VGraph extends JPanel {
 
         this.revalidate();
         this.repaint();
-    }
+    }*/
 
     public HashMap<String, Object> find(Point2D p){
         for(HashMap<String,Object> v: vertices){
