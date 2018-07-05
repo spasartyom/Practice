@@ -1,6 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.*;
 import java.lang.Math;
 
@@ -8,12 +13,25 @@ import java.lang.Math;
 public class VGraph extends JPanel {
     public ArrayList<HashMap<String,Object>> vertices;
     public ArrayList<HashMap<String,Object>> edges;
+    public boolean wght = false;
+    public HashMap<String, Object> current;
+
+    //public ArrayList<HashMap<String, Object>> weightes;
 
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint ( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
         for (HashMap<String,Object> e: edges) {
             g2d.draw((Line2D) e.get("component"));
+            //g2d.setColor(Color.RED);
+            if(wght) {
+                Coord From = (Coord) e.get("posFrom");
+                Coord To = (Coord) e.get("posTo");
+                g2d.drawString(e.get("weight").toString(), (To.x - From.x) / 2 + From.x, (To.y - From.y) / 2 + From.y);
+                //g2d.draw((String));
+            }
         }
 
         //Работа с цветом линии/фигуры
@@ -23,27 +41,28 @@ public class VGraph extends JPanel {
         //рисование кружочков для вершин графа
         for (int i = 0; i<vertices.size(); ++i) {       //проходим по всем вершинам
             Coord vertC = (Coord) vertices.get(i).get("pos");    //координата вершины
-
+            g2d.draw((Ellipse2D) vertices.get(i).get("component"));
             //если надо закрасить кружочки:
             Color newColor = (Color) vertices.get(i).get("color");
             // Устанавливаем новый цвет;
-            g.setColor(newColor);
-            g.fillOval(vertC.x-20,vertC.y-10,30,30);
+            g2d.setColor(newColor);
+            g2d.fill((Ellipse2D) vertices.get(i).get("component"));
+           // g2d.fillOval(vertC.x-20,vertC.y-10,30,30);
 
             // Восстанавливаем исходный цвет;
-            g.setColor(oldColor);
-            g.drawOval(vertC.x-20,vertC.y-10,30,30);
+            g2d.setColor(oldColor);
+           // g2d.drawOval(vertC.x-20,vertC.y-10,30,30);
 
-            g.drawString((String) vertices.get(i).get("name"), vertC.x-10, vertC.y+10);
+            g2d.drawString((String) vertices.get(i).get("name"), vertC.x-10, vertC.y+10);
         }
     }
 
     private void addVertex(String name) {
-        HashMap<String, Object> vertex = new HashMap<>(4);
+        HashMap<String, Object> vertex = new HashMap<>(5);
         vertex.put("name", name);
-        vertex.put("color",Color.white);
+        vertex.put("color",Color.blue);
         vertex.put("pos", new Coord(0,0));
-        vertex.put("component", new JLabel());
+        vertex.put("component", new Ellipse2D.Double(0, 0, 30, 30));
         vertices.add(vertex);
     }
 
@@ -70,14 +89,10 @@ public class VGraph extends JPanel {
     private void reposition() {
         for (int i = 0; i<vertices.size(); ++i) {
             HashMap<String,Object> cur = vertices.get(i);
-            Coord place = new Coord(214+(int)(130*Math.cos(6.28/vertices.size()*i)),150+(int)(130*Math.sin(6.28/vertices.size()*i)));
+            Coord place = new Coord(314+(int)(150*Math.cos(6.28/vertices.size()*i)),220+(int)(150*Math.sin(6.28/vertices.size()*i)));
             cur.replace("pos", place);
-            JLabel lbl = (JLabel) cur.get("component");
-            lbl.setText((String) cur.get("name"));
-            lbl.setBounds(place.x-10,place.y-10,30,30);
-            lbl.setVisible(true);
-            lbl.setBackground((Color) cur.get("color"));
-            this.add(lbl);
+            Ellipse2D.Double v = (Ellipse2D.Double) cur.get("component");
+            v.setFrame(place.x-20, place.y-10, 30, 30);
         }
 
         for (int i = 0; i<edges.size(); ++i) {
@@ -99,8 +114,35 @@ public class VGraph extends JPanel {
     }
 
     public VGraph(Graph original) {
-        this.setBounds(0,0,428, 300);
+        this.setBounds(0,0,634, 460);
         this.setLayout(null);
+
+        addMouseListener(new MyMouse());
+        addMouseMotionListener(new MyMove());
+
+        vertices = new ArrayList<>(original.V());
+        edges = new ArrayList<>(original.edges().size());
+
+
+        LinkedList<Edge> tmp = new LinkedList<>(original.edges()) ;
+        for (int i = 0; i<original.V(); ++i) {
+            this.addVertex( String.valueOf(i));
+        }
+
+        for(Edge e : tmp){
+            this.addEdge(String.valueOf(e.either()), String.valueOf(e.other(e.either())), e.weight());
+        }
+        reposition();
+
+        this.revalidate();
+        this.repaint();
+    }
+    public VGraph(MST original) {
+        this.setBounds(0,0,634, 460);
+        this.setLayout(null);
+
+        addMouseListener(new MyMouse());
+        addMouseMotionListener(new MyMove());
 
         vertices = new ArrayList<>(original.V());
         edges = new ArrayList<>(original.edges().size());
@@ -118,24 +160,57 @@ public class VGraph extends JPanel {
         this.revalidate();
         this.repaint();
     }
-    public VGraph(MST original) {
-        this.setBounds(0,0,428, 300);
-        this.setLayout(null);
 
-        vertices = new ArrayList<>(original.V());
-        edges = new ArrayList<>(original.edges().size());
+    public HashMap<String, Object> find(Point2D p){
+        for(HashMap<String,Object> v: vertices){
+            Ellipse2D tmp = (Ellipse2D) v.get("component");
+            if(tmp.contains(p)) return v;
+        }
+        return null;
+    }
 
-        LinkedList<Edge> tmp = new LinkedList<>(original.edges()) ;
-        for (int i = 0; i<original.V(); ++i) {
-            this.addVertex( String.valueOf(i));
+    private class MyMouse extends MouseAdapter{
+        @Override
+        public void mousePressed(MouseEvent e) {
+            current = find(e.getPoint());
+        }
+    }
+
+    private class MyMove implements MouseMotionListener {
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            if(find(e.getPoint()) == null)
+                setCursor(Cursor.getDefaultCursor());
+            else
+                setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
 
-        for(Edge e : tmp){
-            this.addEdge(String.valueOf(e.either()), String.valueOf(e.other(e.either())), e.weight());
-        }
-        reposition();
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            if(current != null){
+                Ellipse2D tmp = (Ellipse2D) current.get("component");
+                Coord crd = new Coord(e.getX()+10,e.getY());
+                tmp.setFrame(crd.x-20, crd.y-10,30,30);
+                current.replace("pos", crd);
 
-        this.revalidate();
-        this.repaint();
+                for(HashMap<String, Object> ed : edges){
+                    if(ed.get("from").toString().equals(current.get("name").toString())){
+                        Coord f = (Coord) current.get("pos");
+                        Coord t = (Coord) ed.get("posTo");
+                        ed.replace("posFrom", f);
+                        Line2D line = (Line2D) ed.get("component");
+                        line.setLine(f.x, f.y, t.x, t.y);
+                    }
+                    if(ed.get("to").toString().equals(current.get("name").toString())){
+                        Coord f = (Coord) ed.get("posFrom");
+                        Coord t = (Coord) current.get("pos");
+                        ed.replace("posTo", t);
+                        Line2D line = (Line2D) ed.get("component");
+                        line.setLine(f.x, f.y, t.x, t.y);
+                    }
+                }
+                repaint();
+            }
+        }
     }
 }
