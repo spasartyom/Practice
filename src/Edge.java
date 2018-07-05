@@ -1,5 +1,3 @@
-//package com.etu.practice.graph;
-
 public class Edge implements Comparable<Edge>{
     private final int v;
     private final int w;
@@ -22,10 +20,15 @@ public class Edge implements Comparable<Edge>{
         else if(this.weight()>that.weight()) return 1;
         else return 0;
     }
+    public boolean equals(Edge that){
+        if(this.compareTo(that)==0 && this.either()==that.either() && this.other(this.either())==that.other(that.either())){
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public String toString() {
         return String.format("%d-%d %.2f", v, w, weight);
     }
 }
-

@@ -10,7 +10,6 @@ public class InputOutput {
     public Graph getData(Graph g, BufferedReader cin, BufferedReader cinV) throws IOException {//передаем ссылку на граф, в который надо считать данные,
         StringTokenizer tokenizer = new StringTokenizer(cinV.readLine());
         g = new Graph(Integer.parseInt(tokenizer.nextToken())); //считываем количество вершин графа
-        //g.numE = Integer.parseInt(tokenizer.nextToken()); //считываем количество ребер графа
         String s;
         while((s=cin.readLine())!=null){
             tokenizer = new StringTokenizer(s);
@@ -21,5 +20,4 @@ public class InputOutput {
         }
         return g;
     }
-
 }

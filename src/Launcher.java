@@ -117,7 +117,17 @@ public class Launcher extends JFrame{
         //строка для указания кол-ва вершин
         this.dataGraph = new JTextArea("");
         this.dataGraph.setBounds(12,64,140,1840);
-        //this.dataGraph.setText("8 10\n1 2\n2 3\n2 4\n3 4\n4 3\n4 5\n4 6\n6 7\n7 8\n8 6");
+        this.dataGraph.setText("0 1 7\n" +
+                "0 3 4\n" +
+                "1 3 9\n" +
+                "1 2 11\n" +
+                "1 4 10\n" +
+                "2 4 5\n" +
+                "3 4 15\n" +
+                "3 5 6\n" +
+                "4 5 12\n" +
+                "4 6 8\n" +
+                "5 6 13");
         JScrollPane scroll = new JScrollPane(dataGraph);
         scroll.setBounds(12,64,140,184);
         scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -166,6 +176,7 @@ public class Launcher extends JFrame{
                 try {
                     gr = ios.getData(gr, new BufferedReader(new StringReader(dataGraph.getText())),
                             new BufferedReader(new StringReader(spinner.getValue().toString())));
+                    mst = new MST(gr);
                     canvas.setContent(gr);
                     descLabel.setText("Description: Graph is constructed");
                     resLabel.setText("Result: -");
@@ -181,17 +192,36 @@ public class Launcher extends JFrame{
 
         buttonCheck.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ev) {
-                if(buttonResult.isEnabled())
-                    canvas.checkBox(gr);
-                else
-                    canvas.checkBox(new MST(gr));
+                canvas.checkBox();
+            }
+        });
+        buttonNext.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ev) {
+                try {
+                    MST mstEnd = new MST(gr);
+                    mstEnd.build();
+                    if(mstEnd.equal(mst)){
+                        buttonResult.setEnabled(false);
+                        buttonNext.setEnabled(false);
+                        buttonGraph.setEnabled(true);
+                        resLabel.setText("Result: "+ mst.weight());
+                    }
+                    else{
+                        resLabel.setText("Result: step by step...");
+                    }
+                    canvas.setMST(mst.MSTtoGraph());
+                    mst.buildStep();
+                    descLabel.setText("Description: MST");
+                } catch (Exception e) {
+                    descLabel.setText("Description: exception! "+e.getClass().getName()+": "+e.getMessage());
+                }
             }
         });
 
         buttonResult.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
-                mst = new MST(gr);
-                canvas.setContent(mst);
+                mst.build();
+                canvas.setMST(gr);
                 descLabel.setText("Description: MST");
                 resLabel.setText("Result: "+ mst.weight());
                 buttonResult.setEnabled(false);
@@ -200,6 +230,51 @@ public class Launcher extends JFrame{
             }
         });
 
+
+        buttonRand.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ev) {
+                int num = (int) (3 + Math.random()*9);
+                spinner.setValue(num);
+                dataGraph.setText("");
+                int numEdg = 0;
+                for(int i = 0; i <= num; ++i){
+                    numEdg += i;
+                }
+
+                int[] v1 = new int[numEdg];
+                int[] v2 = new int[numEdg];
+                double[] w = new double[numEdg];
+                UnionField uf = new UnionField(num);
+
+                for(int i=0; uf.count()!=1 ; i++){
+                    w[i] = Math.random()*1000;
+                    do{
+                        v1[i] = (int) (0+Math.random()*(num));
+                        v2[i] = (int) (0+Math.random()*(num));
+                    }while((v1[i]==v2[i]));
+                    for (int j = 0; j < i; j++) {
+                        if ((v1[i] == v1[j] && v2[i] == v2[j]) || (v1[i] == v2[j] && v2[i] == v1[j])) {
+                            do {
+                                v1[i] = (int) (0 + Math.random() * (num));
+                                v2[i] = (int) (0 + Math.random() * (num));
+                            }
+                            while ((v1[i] == v2[i])
+                                    || ((v1[i] == v1[j] && v2[i] == v2[j]) || (v1[i] == v2[j] && v2[i] == v1[j])));
+                        }
+                    }
+                    uf.unoin(v1[i], v2[i]);
+                    int tmp = (int) w[i];
+                    w[i] = 1+((double)tmp)/20;
+                    dataGraph.append(""+v1[i]+" ");
+                    dataGraph.append(""+v2[i]+" ");
+                    dataGraph.append(""+w[i]+"\n");
+                }
+                buttonResult.setEnabled(false);
+                buttonNext.setEnabled(false);
+                buttonGraph.setEnabled(true);
+            }
+
+        });
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
@@ -207,21 +282,3 @@ public class Launcher extends JFrame{
         new Launcher();
     }
 }
-
-/*
-7
-0 1 7
-0 3 4
-1 3 9
-1 2 11
-1 4 10
-2 4 5
-3 4 15
-3 5 6
-4 5 12
-4 6 8
-5 6 13
-
-2
-0 1 100
-*/

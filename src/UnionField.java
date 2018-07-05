@@ -1,5 +1,3 @@
-//package com.etu.practice.graph;
-
 public class UnionField {
     private int[] id;
     private int count;
@@ -21,5 +19,6 @@ public class UnionField {
         for(int i=0; i<id.length; i++){
             if(id[i] == ptr) id[i] = qtr;
         }
+        count--;
     }
 }
