@@ -32,7 +32,7 @@ public class Launcher extends JFrame{
 
     private Canvas canvas;
 
-    Graphics g;
+    //Graphics g;
 
     private InputOutput ios;
     private Graph gr;
@@ -42,15 +42,15 @@ public class Launcher extends JFrame{
 
     // ключевое слово super, которое обозначает суперкласс, т.е. класс, производным от которого является текущий класс
     public Launcher() {
-        this.setSize(600,400);
+        this.setSize(800,550);
         this.setResizable(false);
-        this.setMinimumSize(new Dimension(600,400));
+        this.setMinimumSize(new Dimension(800,550));
         this.setTitle("BoruvkaMST");
         this.rootPanel = new JPanel();
         rootPanel.setLayout(null);      //абсолютное позиционирование
-        rootPanel.setBounds(0,0,600,400);
+        rootPanel.setBounds(0,0,800,550);
 
-        this.setBounds(100,100,450,400);
+        //this.setBounds(100,100,450,400);
         setContentPane(rootPanel);
 
 
@@ -106,12 +106,12 @@ public class Launcher extends JFrame{
 
         //поясняющие надписи
         this.descLabel = new JLabel();
-        this.descLabel.setBounds(166,300,418,48);
+        this.descLabel.setBounds(166,450,418,48);
         this.descLabel.setText("Description: ");
         this.descLabel.setFont(font);
 
         this.resLabel = new JLabel();
-        this.resLabel.setBounds(166,340,418,16);
+        this.resLabel.setBounds(166,490,418,16);
         this.resLabel.setText("Result: -");
         this.resLabel.setFont(font);
         //строка для указания кол-ва вершин
@@ -124,7 +124,7 @@ public class Launcher extends JFrame{
         scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         this.canvas = new Canvas();
-        this.canvas.setBounds(166,12,418,300);
+        this.canvas.setBounds(166,0,634,460);
         this.canvas.setVisible(true);
 
         this.rootPanel.add(this.canvas);
@@ -179,6 +179,14 @@ public class Launcher extends JFrame{
             }
         });
 
+        buttonCheck.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ev) {
+                if(buttonResult.isEnabled())
+                    canvas.checkBox(gr);
+                else
+                    canvas.checkBox(new MST(gr));
+            }
+        });
 
         buttonResult.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
