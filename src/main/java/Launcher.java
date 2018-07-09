@@ -46,7 +46,7 @@ public class Launcher extends JFrame{
 
         Font font = new Font("Consolas", 0, 13);
 
-        SpinnerModel modelVertex = new SpinnerNumberModel(7,2,100,1);
+        SpinnerModel modelVertex = new SpinnerNumberModel(7,-3,1000000000,1);
         this.spinner = new JSpinner(modelVertex);
         this.spinner.setBounds(112,12,38,28);
         this.spinner.setVisible(true);
@@ -57,7 +57,7 @@ public class Launcher extends JFrame{
         this.labelWeight.setBounds(12,18,108,14 );
         this.labelWeight.setVisible(true);
 
-        SpinnerModel modelEdges = new SpinnerNumberModel(1,1,4950,1);
+        SpinnerModel modelEdges = new SpinnerNumberModel(1,-10,4950,1);
         this.spinnerEdges = new JSpinner(modelEdges);
         this.spinnerEdges.setBounds(112,52,38,28);
         this.spinnerEdges.setVisible(true);
